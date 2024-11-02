@@ -23,7 +23,6 @@ namespace MessagingBackend {
         {
             var buffer = System.Text.Encoding.UTF8.GetBytes(message);
             var segment = new ArraySegment<byte>(buffer);
-
             foreach (var socket in _sockets.Values)
             {
                 if (socket.State == WebSocketState.Open)
@@ -31,8 +30,8 @@ namespace MessagingBackend {
                     Console.WriteLine("Sending to socket");
                     await socket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
                 }
-                Console.WriteLine("Finished sending ==============");
             }
+            Console.WriteLine("Finished sending ==============");
         }
     }
 }

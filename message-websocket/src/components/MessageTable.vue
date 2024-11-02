@@ -58,7 +58,7 @@ export default defineComponent({
         const data = await response.json();
         console.log("received response");
         console.log(data); // Handle the response if needed
-        alert('Message sent successfully!');
+        //alert('Message sent successfully!');
       } catch (error) {
         console.error('Error:', error);
         //alert('Failed to send message.');
