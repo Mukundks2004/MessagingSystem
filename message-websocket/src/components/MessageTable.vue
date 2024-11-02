@@ -9,46 +9,49 @@
             </tr>
         </thead>
         <tbody>
-            <tr class="tr">
-                <td class="td">Mukund</td>
-                <td class="td">This is the first message!</td>
-                <td class="td"></td>
+            <tr class="tr" v-for="(msg, index) in messages" :key="index">
+                <td class="td">{{ msg.person }}</td>
+                <td class="td">{{ msg.text }}</td>
+                <td class="td">{{ msg.timeSent }}</td>
             </tr>
         </tbody>
     </table> 
     </div>
     
     <div class="centered button-centered">
-        <input type="text" class="styled-input" placeholder="Your Name" />
-        <input type="text" class="styled-input" placeholder="My Name" />
+        <div id="myName">You Are:</div>
+        <input v-model="message" class="styled-input" placeholder="Enter msg" />
         <br>
-        <input v-model="message" placeholder="Enter your message" />
         <button class="button-30" @click="sendMessage">Send!</button>
     </div>
+	<div id="message"></div>
+
 </template>
 
 
 <script>
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted, onBeforeUnmount } from 'vue';
 
 export default defineComponent({
   name: 'MessageSender',
   setup() {
     const message = ref('');
+    const socket = ref(null);
+    const messages = ref([]);
+    var name = "";
 
     const sendMessage = async () => {
       if (!message.value) {
-        alert('Please enter a message.');
         return;
       }
 
       try {
         const response = await fetch('http://localhost:5121/api/message/broadcast', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ message: message.value }),
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: name + "|||" + message.value }),
         });
 
         if (!response.ok) {
@@ -56,21 +59,67 @@ export default defineComponent({
         }
 
         const data = await response.json();
-        console.log("received response");
-        console.log(data); // Handle the response if needed
-        //alert('Message sent successfully!');
+        console.log("Received response:", data); // Handle the response if needed
       } catch (error) {
         console.error('Error:', error);
-        //alert('Failed to send message.');
       }
     };
+
+    const connectSocket = () => {
+      socket.value = new WebSocket('ws://localhost:5121'); // Adjust the URL if needed
+
+      socket.value.onopen = () => {
+        console.log('WebSocket connection opened.');
+      };
+
+      socket.value.onmessage = (event) => {
+        if (name === "") {
+            const myDoc = document.getElementById("myName");
+            myDoc.textContent = "You are: " + event.data
+            name = event.data;
+        }
+        else {
+            const newMessage = {
+                person: event.data.split('|||')[0], // You can customize this as needed
+                text: event.data.split("|||")[1],
+                timeSent: new Date().toLocaleTimeString(), // Get the current time
+            };
+
+            messages.value.push(newMessage); // Add the new message to the array
+            message.value = '';
+            console.log("Message received:", event.data);
+        }
+      };
+
+      socket.value.onclose = () => {
+        console.log('WebSocket connection closed.');
+      };
+
+      socket.value.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+    };
+
+    onMounted(() => {
+      connectSocket();
+    });
+
+    onBeforeUnmount(() => {
+      if (socket.value) {
+        socket.value.close(); // Cleen it
+      }
+    });
 
     return {
       message,
       sendMessage,
+      messages, // Expose jose
     };
   },
 });
+
+
+    
 </script>
 
 <style>
@@ -83,6 +132,7 @@ export default defineComponent({
         text-align: center;
         padding: 10px;
         margin: 10px;
+        display:
     }
 
     .table {

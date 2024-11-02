@@ -20,16 +20,9 @@ namespace MessagingBackend {
             _webSocketManager = webSocketManager;
         }
 
-        // [HttpPost("broadcast")]
-        // public async Task<IActionResult> BroadcastMessage([FromBody] string message)
-        // {
-        //     await _webSocketManager.SendMessageToAll(message);
-        //     return Ok("Message sent to all clients.");
-        // }
-
         public class MessageRequest
         {
-            public string Message { get; set; }
+            public required string Message { get; set; }
         }
 
         [HttpPost("broadcast")]

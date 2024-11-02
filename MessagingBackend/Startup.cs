@@ -35,27 +35,31 @@ namespace MessagingBackend
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseWebSockets(); // Enable WebSockets
+            app.UseWebSockets();
 
             app.UseRouting();
-            app.UseCors("AllowAllOrigins"); // Use the CORS policy
+            app.UseCors("AllowAllOrigins");
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers(); // Maps controller routes
+                endpoints.MapControllers();
             });
 
-            app.UseWebSockets(); // Enable WebSockets
+            app.UseWebSockets();
 
             app.Use(async (context, next) =>
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
                     var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                    string socketId = Guid.NewGuid().ToString(); // Generate a unique ID for the socket
+                    var socketId = NameGenerationService.GetUniqueSocketId();
+                    var currentNames = webSocketManager.GetAllSocketIds();
+                    while (currentNames.Contains(socketId)) {
+                        socketId = NameGenerationService.GetUniqueSocketId();
+                    }
+
                     webSocketManager.AddSocket(socketId, webSocket);
 
-                    // Handle incoming messages and connection close
                     await HandleWebSocket(socketId, webSocket, webSocketManager);
                 }
                 else
@@ -70,17 +74,22 @@ namespace MessagingBackend
             var buffer = new byte[1024 * 4];
             WebSocketReceiveResult? result = null;
 
+            var myBytes = System.Text.Encoding.UTF8.GetBytes(socketId);
+            var segment = new ArraySegment<byte>(myBytes);
+
+            await webSocket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
+
             try
             {
                 while (webSocket.State == WebSocketState.Open)
                 {
                     result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                    // You can handle messages here if needed
+                    // receive msgs
                 }
             }
             catch (Exception)
             {
-                // Handle exceptions as necessary
+                // exceptions lol
             }
             finally
             {
