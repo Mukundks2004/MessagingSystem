@@ -59,17 +59,16 @@ export default defineComponent({
         }
 
         const data = await response.json();
-        console.log("Received response:", data); // Handle the response if needed
       } catch (error) {
         console.error('Error:', error);
       }
     };
 
     const connectSocket = () => {
-      socket.value = new WebSocket('ws://localhost:5121'); // Adjust the URL if needed
+      socket.value = new WebSocket('ws://localhost:5121');
 
       socket.value.onopen = () => {
-        console.log('WebSocket connection opened.');
+        console.log('connection opened.');
       };
 
       socket.value.onmessage = (event) => {
@@ -80,23 +79,22 @@ export default defineComponent({
         }
         else {
             const newMessage = {
-                person: event.data.split('|||')[0], // You can customize this as needed
+                person: event.data.split('|||')[0],
                 text: event.data.split("|||")[1],
-                timeSent: new Date().toLocaleTimeString(), // Get the current time
+                timeSent: new Date().toLocaleTimeString(),
             };
 
-            messages.value.push(newMessage); // Add the new message to the array
+            messages.value.push(newMessage);
             message.value = '';
-            console.log("Message received:", event.data);
         }
       };
 
       socket.value.onclose = () => {
-        console.log('WebSocket connection closed.');
+        console.log('connection closed.');
       };
 
       socket.value.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.error('error:', error);
       };
     };
 
