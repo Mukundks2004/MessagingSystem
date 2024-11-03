@@ -25,6 +25,16 @@ namespace MessagingBackend
                             .AllowAnyHeader();
                     });
             });
+
+            
+            // services.AddCors(options =>
+            // {
+            //     options.AddPolicy("AllowSpecificOrigin",
+            //         builder => builder.WithOrigins("http://localhost:8080")
+            //                         .AllowAnyHeader()
+            //                         .AllowAnyMethod());
+            // });
+    
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, WebSocketManager webSocketManager)
@@ -39,6 +49,7 @@ namespace MessagingBackend
 
             app.UseRouting();
             app.UseCors("AllowAllOrigins");
+            // app.UseCors("AllowSpecificOrigin");
 
             app.UseEndpoints(endpoints =>
             {
@@ -94,7 +105,13 @@ namespace MessagingBackend
             finally
             {
                 webSocketManager.RemoveSocket(socketId);
-                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+                try {
+                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+                }
+                catch (Exception ex) {
+                    Console.WriteLine("Tried to close websocket but failed");
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
 

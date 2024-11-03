@@ -1,6 +1,6 @@
-@MessagingBackend_HostAddress = http://localhost:5121
+@MessagingBackend_HostAddress = http://192.168.0.118:5121
 
-GET {{MessagingBackend_HostAddress}}/weatherforecast/
+GET {{MessagingBackend_HostAddress}}/MukundMessagingBackend/
 Accept: application/json
 
 ###

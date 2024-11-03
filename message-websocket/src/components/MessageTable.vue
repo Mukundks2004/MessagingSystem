@@ -46,7 +46,7 @@ export default defineComponent({
       }
 
       try {
-        const response = await fetch('http://localhost:5121/api/message/broadcast', {
+        const response = await fetch('http://192.168.0.118:5121/api/message/broadcast', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export default defineComponent({
     };
 
     const connectSocket = () => {
-      socket.value = new WebSocket('ws://localhost:5121');
+      socket.value = new WebSocket('ws://192.168.0.118:5121');
 
       socket.value.onopen = () => {
         console.log('connection opened.');
